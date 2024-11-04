@@ -2,6 +2,7 @@ package tests
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/mysiar-org/go-sql-raw"
@@ -9,7 +10,7 @@ import (
 	"testing"
 )
 
-func Test(t *testing.T) {
+func TestRows2Map(t *testing.T) {
 	db := setupDb()
 	rows, err := db.Query("SELECT * FROM album ORDER BY id")
 	chkError(err)
@@ -31,6 +32,19 @@ func Test(t *testing.T) {
 		assert.Equal(t, expectedArtists[idx], entry["artist"])
 		assert.Equal(t, expectedTitle[idx], entry["title"])
 	}
+}
+
+func TestError(t *testing.T) {
+
+	err := errors.New("Dummy error.")
+	t.Run("panics", func(t *testing.T) {
+		defer func() {
+			if r := recover(); r == nil {
+				t.Errorf("function should panic")
+			}
+		}()
+		go_sql_raw.Error(err)
+	})
 }
 
 func setupDb() *sql.DB {
